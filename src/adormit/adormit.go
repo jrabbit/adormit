@@ -3,6 +3,7 @@ package adormit
 import (
 	"bytes"
 	"fmt"
+	"github.com/gotk3/gotk3/glib"
 	"log"
 	"os/exec"
 	"time"
@@ -28,5 +29,15 @@ func GetGnomeAlarms() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	// s := out.String()
+	// gv := GVariantNew(unsafe.Pointer(&s))
+	// fmt.Println(gv.TypeString())
 	fmt.Println(out.String())
+}
+
+func GoGoGSettings() {
+	// gtk.Init(nil)
+	settings := glib.SettingsNew("org.gnome.clocks")
+	alarms := settings.GetValue("alarms")
+	fmt.Println(alarms)
 }

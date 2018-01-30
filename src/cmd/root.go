@@ -10,7 +10,7 @@ var RootCmd = &cobra.Command{
 	Short: "Your personal time agent",
 	Run: func(cmd *cobra.Command, args []string) {
 		// cmd.Help()
-		adormit.GetGnomeAlarms()
+		adormit.GoGoGSettings()
 	},
 }
 

@@ -15,6 +15,12 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/gotk3/gotk3",
+			"repository": "https://github.com/gotk3/gotk3",
+			"revision": "27f8bc89d917246e22d64a5992ac5688878b6435",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/hashicorp/hcl",
 			"repository": "https://github.com/hashicorp/hcl",
 			"revision": "23c074d0eceb2b8a5bfdbb271ab780cde70f05a8",
