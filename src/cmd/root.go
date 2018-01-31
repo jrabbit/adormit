@@ -11,6 +11,7 @@ var RootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// cmd.Help()
 		adormit.GetGnomeAlarms()
+		adormit.MakeAlarm()
 	},
 }
 
