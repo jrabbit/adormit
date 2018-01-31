@@ -1,11 +1,10 @@
 package adormit
 
 import (
-	"bytes"
 	"fmt"
+	"github.com/godbus/dbus"
 	"github.com/gotk3/gotk3/glib"
-	"log"
-	"os/exec"
+	"reflect"
 	"time"
 )
 
@@ -16,28 +15,31 @@ type Alarm struct {
 }
 
 // func MakeAlarm() {
-// 	alarm := Alarm{name:"my-alarm"}
+// 	alarm := Alarm{name: "my-alarm"}
 
 // }
 
-func GetGnomeAlarms() {
-	//gsettings get org.gnome.clocks  alarms
-	cmd := exec.Command("gsettings", "get", "org.gnome.clocks", "alarms")
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	err := cmd.Run()
-	if err != nil {
-		log.Fatal(err)
+// func SetAlarm(alarm Alarm) {
+
+// }
+
+func debug(ty interface{}) {
+	fooType := reflect.TypeOf(ty)
+	fmt.Println(fooType)
+	for i := 0; i < fooType.NumMethod(); i++ {
+		method := fooType.Method(i)
+		fmt.Println(method.Name)
 	}
-	// s := out.String()
-	// gv := GVariantNew(unsafe.Pointer(&s))
-	// fmt.Println(gv.TypeString())
-	fmt.Println(out.String())
 }
 
-func GoGoGSettings() {
-	// gtk.Init(nil)
+func GetGnomeAlarms() {
+	//gsettings get org.gnome.clocks alarms
 	settings := glib.SettingsNew("org.gnome.clocks")
 	alarms := settings.GetValue("alarms")
-	fmt.Println(alarms)
+	// debug(settings)
+	sig, _ := dbus.ParseSignature("aa{sv}")
+	v, _ := dbus.ParseVariant(alarms.String(), sig)
+	val := v.Value()
+	alarmMaps := val.([]map[string]dbus.Variant)
+	fmt.Println(alarmMaps)
 }

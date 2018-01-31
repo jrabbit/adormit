@@ -15,6 +15,12 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/godbus/dbus",
+			"repository": "https://github.com/godbus/dbus",
+			"revision": "a389bdde4dd695d414e47b755e95e72b7826432c",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/gotk3/gotk3",
 			"repository": "https://github.com/gotk3/gotk3",
 			"revision": "27f8bc89d917246e22d64a5992ac5688878b6435",
