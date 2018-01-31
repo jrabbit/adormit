@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/godbus/dbus"
 	"github.com/gotk3/gotk3/glib"
+	"os/exec"
 	"reflect"
 	"time"
 )
@@ -21,6 +22,23 @@ type Timer struct {
 	start    time.Time
 	duration time.Duration
 	end      time.Time
+	command  string
+	args     []string
+}
+
+func (t Timer) Countdown() {
+	timer1 := time.NewTimer(t.duration)
+	<-timer1.C
+	fmt.Println("Timer completed")
+	t.end = time.Now()
+	cmd := exec.Command(t.command, t.args...)
+	cmd.Run()
+}
+
+func DemoTimer() {
+	args := []string{"-i", "clock", "Timer over!", "adormit"}
+	t := Timer{duration: time.Second * 1, command: "notify-send", args: args}
+	t.Countdown()
 }
 
 func MakeAlarm() {
@@ -29,20 +47,18 @@ func MakeAlarm() {
 }
 
 func SetAlarm(alarm Alarm) {
-	var insert []map[string]interface{}
-	// insert := make(map[string]dbus.Variant)
-	a := make(map[string]interface{})
-	a["name"] = alarm.name
-	a["active"] = alarm.active
-	// existing_alarms := GetGnomeAlarms()
-	// total_update := make([]map[string]dbus.Variant, 10)
-	// total_update = append(total_update, insert)
-	// total_update = append(total_update, existing_alarms)
-	// total_update[2] = insert
+	var insert []map[string]dbus.Variant
+	a := make(map[string]dbus.Variant)
+	a["name"] = dbus.MakeVariant(alarm.name)
+	a["active"] = dbus.MakeVariant(alarm.active)
+	existing_alarms := GetGnomeAlarms()
 	insert = append(insert, a)
+	for _, v := range existing_alarms {
+		insert = append(insert, v)
+	}
+	// insert = append(insert, get_v().([]interface{})[0].(map[string]interface{}))
 	sig, _ := dbus.ParseSignature("aa{sv}")
 	existing_alarms_var := dbus.MakeVariantWithSignature(insert, sig)
-
 	fmt.Println(existing_alarms_var)
 }
 
@@ -53,6 +69,14 @@ func debug(ty interface{}) {
 		method := fooType.Method(i)
 		fmt.Println(method.Name)
 	}
+}
+
+func get_v() interface{} {
+	settings := glib.SettingsNew("org.gnome.clocks")
+	alarms := settings.GetValue("alarms")
+	sig, _ := dbus.ParseSignature("aa{sv}")
+	v, _ := dbus.ParseVariant(alarms.String(), sig)
+	return v.Value()
 }
 
 func GetGnomeAlarms() []map[string]dbus.Variant {
