@@ -12,7 +12,7 @@ var RootCmd = &cobra.Command{
 		// cmd.Help()
 		adormit.GetGnomeAlarms()
 		adormit.MakeAlarm()
-		adormit.DemoTimer()
+		// adormit.DemoTimer()
 	},
 }
 

@@ -17,36 +17,7 @@ type Alarm struct {
 	id     string
 }
 
-type Timer struct {
-	name     string
-	start    time.Time
-	duration time.Duration
-	end      time.Time
-	command  string
-	args     []string
-}
-
-func (t Timer) Countdown() {
-	timer1 := time.NewTimer(t.duration)
-	<-timer1.C
-	fmt.Println("Timer completed")
-	t.end = time.Now()
-	cmd := exec.Command(t.command, t.args...)
-	cmd.Run()
-}
-
-func DemoTimer() {
-	args := []string{"-i", "clock", "Timer over!", "adormit"}
-	t := Timer{duration: time.Second * 1, command: "notify-send", args: args}
-	t.Countdown()
-}
-
-func MakeAlarm() {
-	alarm := Alarm{name: "my-alarm", active: true}
-	SetAlarm(alarm)
-}
-
-func SetAlarm(alarm Alarm) {
+func (alarm Alarm) SetAlarm() {
 	var insert []map[string]dbus.Variant
 	a := make(map[string]dbus.Variant)
 	a["name"] = dbus.MakeVariant(alarm.name)
@@ -62,6 +33,35 @@ func SetAlarm(alarm Alarm) {
 	fmt.Println(existing_alarms_var)
 }
 
+type Timer struct {
+	Name     string
+	start    time.Time
+	Duration time.Duration
+	end      time.Time
+	Command  string
+	Args     []string
+}
+
+func (t Timer) Countdown() {
+	timer1 := time.NewTimer(t.Duration)
+	<-timer1.C
+	fmt.Println("Timer completed")
+	t.end = time.Now()
+	cmd := exec.Command(t.Command, t.Args...)
+	cmd.Run()
+}
+
+func DemoTimer() {
+	args := []string{"-i", "clock", "Timer over!", "adormit"}
+	t := Timer{Duration: time.Second * 1, Command: "notify-send", Args: args}
+	t.Countdown()
+}
+
+func MakeAlarm() {
+	alarm := Alarm{name: "my-alarm", active: true}
+	alarm.SetAlarm()
+}
+
 func debug(ty interface{}) {
 	fooType := reflect.TypeOf(ty)
 	fmt.Println(fooType)
@@ -71,19 +71,18 @@ func debug(ty interface{}) {
 	}
 }
 
-func get_v() interface{} {
-	settings := glib.SettingsNew("org.gnome.clocks")
-	alarms := settings.GetValue("alarms")
-	sig, _ := dbus.ParseSignature("aa{sv}")
-	v, _ := dbus.ParseVariant(alarms.String(), sig)
-	return v.Value()
-}
+// func get_v() interface{} {
+// 	settings := glib.SettingsNew("org.gnome.clocks")
+// 	alarms := settings.GetValue("alarms")
+// 	sig, _ := dbus.ParseSignature("aa{sv}")
+// 	v, _ := dbus.ParseVariant(alarms.String(), sig)
+// 	return v.Value()
+// }
 
 func GetGnomeAlarms() []map[string]dbus.Variant {
 	//gsettings get org.gnome.clocks alarms
 	settings := glib.SettingsNew("org.gnome.clocks")
 	alarms := settings.GetValue("alarms")
-	// debug(settings)
 	sig, _ := dbus.ParseSignature("aa{sv}")
 	v, _ := dbus.ParseVariant(alarms.String(), sig)
 	val := v.Value()
