@@ -18,6 +18,7 @@ var RootCmd = &cobra.Command{
 
 func init() {
 	cobra.OnInitialize(initConfig)
+	adormit.Init()
 }
 
 func Execute() {

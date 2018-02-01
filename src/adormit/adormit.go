@@ -16,6 +16,10 @@ func Version() string {
 var CurrentTimers []Timer
 var CurrentAlarms map[string]Alarm
 
+func Init() {
+	CurrentAlarms = make(map[string]Alarm)
+}
+
 type Alarm struct {
 	Name   string
 	Early  bool
@@ -42,7 +46,32 @@ func (alarm Alarm) SetAlarm() string {
 }
 
 func (alarm Alarm) UnsetAlarm() {
+	// var alarmsToKeep []map[string]dbus.Variant
+	existing_alarms := GetGnomeAlarms()
+	// variant_alarm := alarm.ToVariant()
+	for _, v := range existing_alarms {
+		//v
+		// debug(v)
+		sig, _ := dbus.ParseSignature("a{sv}")
+		existing_alarms_var := dbus.MakeVariantWithSignature(v, sig)
+		// p, err := dbus.ParseVariant(v, sig)
+		// if err != nil {
+		// 	panic(err)
+		// }
+		// val := p.Value()
+		fmt.Println(existing_alarms_var)
+		// if val.Id != variant_alarm["id"] {
+		// 	alarmsToKeep = append(alarmsToKeep, variant_alarm)
+		// }
+	}
+}
 
+func (alarm Alarm) ToVariant() map[string]dbus.Variant {
+	a := make(map[string]dbus.Variant)
+	a["name"] = dbus.MakeVariant(alarm.Name)
+	a["active"] = dbus.MakeVariant(alarm.Active)
+	a["id"] = dbus.MakeVariant(alarm.Id)
+	return a
 }
 
 type Timer struct {
