@@ -65,7 +65,10 @@ func delAlarm(req *http.Request) string {
 	delete(adormit.CurrentAlarms, i)
 	// adormit.CurrentAlarms = append(adormit.CurrentAlarms[:i], adormit.CurrentAlarms[i+1:]...)
 	// balete from gnome-clocks
-	alarm.UnsetAlarm()
+	err := alarm.UnsetAlarm()
+	if err != nil {
+		panic(err)
+	}
 	return "OK"
 }
 func listAlarms(ctx *macaron.Context) {

@@ -1,6 +1,7 @@
 package adormit
 
 import (
+	"errors"
 	"fmt"
 	"github.com/godbus/dbus"
 	"github.com/gotk3/gotk3/glib"
@@ -18,6 +19,7 @@ var CurrentAlarms map[string]Alarm
 
 func Init() {
 	CurrentAlarms = make(map[string]Alarm)
+	CurrentTimers = make([]Timer, 2)
 }
 
 type Alarm struct {
@@ -45,25 +47,28 @@ func (alarm Alarm) SetAlarm() string {
 	return alarm.Id
 }
 
-func (alarm Alarm) UnsetAlarm() {
-	// var alarmsToKeep []map[string]dbus.Variant
+func (alarm Alarm) UnsetAlarm() error {
+	var alarmsToKeep []map[string]dbus.Variant
 	existing_alarms := GetGnomeAlarms()
-	// variant_alarm := alarm.ToVariant()
+	variant_alarm := alarm.ToVariant()
 	for _, v := range existing_alarms {
 		//v
 		// debug(v)
-		sig, _ := dbus.ParseSignature("a{sv}")
-		existing_alarms_var := dbus.MakeVariantWithSignature(v, sig)
-		// p, err := dbus.ParseVariant(v, sig)
-		// if err != nil {
-		// 	panic(err)
-		// }
-		// val := p.Value()
-		fmt.Println(existing_alarms_var)
-		// if val.Id != variant_alarm["id"] {
-		// 	alarmsToKeep = append(alarmsToKeep, variant_alarm)
-		// }
+		sig, _ := dbus.ParseSignature("{sv}")
+		// existing_alarms_var := dbus.MakeVariantWithSignature(v, sig)
+		p, err := dbus.ParseVariant(v["id"].String(), sig)
+		if err != nil {
+			panic(err)
+		}
+		val := p.Value()
+		// fmt.Println(existing_alarms_var)
+		if val != variant_alarm["id"] {
+			alarmsToKeep = append(alarmsToKeep, variant_alarm)
+			fmt.Println(alarmsToKeep)
+			return nil
+		}
 	}
+	return errors.New("Didn't do shit")
 }
 
 func (alarm Alarm) ToVariant() map[string]dbus.Variant {
