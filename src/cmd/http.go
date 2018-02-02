@@ -4,6 +4,7 @@ import (
 	"adormit"
 	"github.com/spf13/cobra"
 	"gopkg.in/macaron.v1"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -54,9 +55,21 @@ func listTimers(ctx *macaron.Context) {
 	return
 }
 
-func newAlarm(req *http.Request) string {
+func newAlarm(req *http.Request, log *log.Logger) string {
 	//insert new alarm locally
-	return "OK"
+	name := req.FormValue("name")
+	early, err := strconv.ParseBool(req.FormValue("early"))
+	// time, err := time.Parse("Mon Jan 2 15:04:05 -0700 MST 2006", req.FormValue("time"))
+	active, err := strconv.ParseBool(req.FormValue("active"))
+	if err != nil {
+		panic(err)
+	}
+	// id := adormit.MakeAlarmId()
+	a := adormit.Alarm{Active: active, Early: early, Name: name}
+	a.MakeId()
+	g := a.SetAlarm()
+	log.Printf("http/newAlarm: %s", a.Uuid)
+	return g
 }
 func delAlarm(req *http.Request) string {
 	// take id remove it from madormit.CurrentAlarms[:i]ap & gnome-clocks

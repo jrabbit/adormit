@@ -1,10 +1,12 @@
 package adormit
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"github.com/godbus/dbus"
 	"github.com/gotk3/gotk3/glib"
+	"github.com/satori/go.uuid"
 	"os/exec"
 	"reflect"
 	"time"
@@ -19,7 +21,7 @@ var CurrentAlarms map[string]Alarm
 
 func Init() {
 	CurrentAlarms = make(map[string]Alarm)
-	CurrentTimers = make([]Timer, 2)
+	CurrentTimers = make([]Timer, 0)
 }
 
 type Alarm struct {
@@ -28,6 +30,7 @@ type Alarm struct {
 	Time   time.Time
 	Active bool
 	Id     string
+	Uuid   uuid.UUID
 }
 
 func (alarm Alarm) SetAlarm() string {
@@ -35,6 +38,7 @@ func (alarm Alarm) SetAlarm() string {
 	a := make(map[string]dbus.Variant)
 	a["name"] = dbus.MakeVariant(alarm.Name)
 	a["active"] = dbus.MakeVariant(alarm.Active)
+	a["id"] = dbus.MakeVariant(alarm.Id)
 	existing_alarms := GetGnomeAlarms()
 	insert = append(insert, a)
 	for _, v := range existing_alarms {
@@ -79,22 +83,37 @@ func (alarm Alarm) ToVariant() map[string]dbus.Variant {
 	return a
 }
 
+func (alarm *Alarm) MakeId() {
+	//id = uuid of name + time
+	slug := alarm.Name + "60 seconds uwu"
+	ns, err := uuid.FromString("e3d6232f-6c5c-4345-bbae-c82d07530216")
+	if err != nil {
+		panic(err)
+	}
+	u := uuid.NewV5(ns, slug)
+	alarm.Uuid = u
+	alarm.Id = hex.EncodeToString(u.Bytes())
+	fmt.Println(alarm)
+}
+
 type Timer struct {
 	Name     string
-	start    time.Time
+	Start    time.Time
 	Duration time.Duration
-	end      time.Time
+	End      time.Time
+	Uuid     uuid.UUID
 	Command  string
 	Args     []string
 }
 
-func (t Timer) Countdown() {
-	CurrentTimers = append(CurrentTimers, t)
-	t.start = time.Now()
+func (t *Timer) Countdown() {
+	t.Uuid = uuid.Must(uuid.NewV4())
+	CurrentTimers = append(CurrentTimers, *t)
+	t.Start = time.Now()
 	timer1 := time.NewTimer(t.Duration)
 	<-timer1.C
 	fmt.Println("Timer completed")
-	t.end = time.Now()
+	t.End = time.Now()
 	cmd := exec.Command(t.Command, t.Args...)
 	cmd.Run()
 }
